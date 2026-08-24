@@ -1,5 +1,5 @@
 # Salesbot-AI-Recommender
-AI-powered product recommendation system built from retail transaction data.
+Data-driven retail product recommendation system.
 # 🤖 SalesBot — Retail Product Recommendation System
 
 An interactive product recommendation system built with Python, Pandas, Scikit-learn and Streamlit.
