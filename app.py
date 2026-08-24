@@ -4,76 +4,115 @@ import pandas as pd
 from recommender import SalesBotRecommender
 
 
-# -----------------------------
+# --------------------------------
 # Page configuration
-# -----------------------------
+# --------------------------------
 
 st.set_page_config(
-    page_title="SalesBot AI Recommender",
+    page_title="SalesBot AI",
     page_icon="🤖",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="auto"
 )
 
 
-# -----------------------------
+# --------------------------------
 # Custom styling
-# -----------------------------
+# --------------------------------
 
 st.markdown(
     """
     <style>
-        .main {
-            padding-top: 2rem;
-        }
 
-        .hero {
-            padding: 2rem;
-            border-radius: 15px;
-            background: linear-gradient(
-                135deg,
-                #1f2937,
-                #374151
-            );
-            color: white;
-            margin-bottom: 2rem;
-        }
+    .main {
+        padding-top: 1rem;
+    }
 
-        .hero h1 {
-            margin-bottom: 0.5rem;
-        }
+    .hero {
+        padding: 2.5rem;
+        border-radius: 20px;
+        background: linear-gradient(
+            135deg,
+            #111827,
+            #374151
+        );
+        color: white;
+        margin-bottom: 2rem;
+    }
 
-        .recommendation-card {
-            padding: 1rem;
-            border-radius: 12px;
-            border: 1px solid #dddddd;
-            margin-bottom: 0.8rem;
-        }
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero p {
+        font-size: 1.15rem;
+        color: #e5e7eb;
+    }
+
+    .recommendation-card {
+        padding: 1.25rem;
+        border-radius: 15px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        margin-bottom: 1rem;
+    }
+
+    .product-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .product-code {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .confidence {
+        font-weight: 600;
+    }
+
+    .section-title {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+
     </style>
     """,
     unsafe_allow_html=True
 )
 
 
-# -----------------------------
+# --------------------------------
 # Header
-# -----------------------------
+# --------------------------------
 
 st.markdown(
     """
     <div class="hero">
-        <h1>🤖 SalesBot AI Recommender</h1>
+
+        <h1>🤖 SalesBot AI</h1>
+
         <p>
-            Discover products that customers frequently purchase together.
+            Intelligent product recommendations powered by
+            real-world retail transaction data.
         </p>
+
     </div>
     """,
     unsafe_allow_html=True
 )
 
 
-# -----------------------------
-# Load recommendation model
-# -----------------------------
+st.write(
+    "Select a product and discover what customers "
+    "frequently purchased together."
+)
+
+
+# --------------------------------
+# Load recommendation engine
+# --------------------------------
 
 @st.cache_resource
 def load_recommender():
@@ -95,7 +134,7 @@ try:
 except Exception as error:
 
     st.error(
-        "SalesBot could not load the recommendation model."
+        "SalesBot could not load the recommendation engine."
     )
 
     st.exception(error)
@@ -103,29 +142,41 @@ except Exception as error:
     st.stop()
 
 
-# -----------------------------
+# --------------------------------
 # Sidebar
-# -----------------------------
+# --------------------------------
 
-st.sidebar.title("SalesBot")
+with st.sidebar:
 
-st.sidebar.write(
-    "Select a product to discover related products."
-)
+    st.header("⚙️ Recommendation Settings")
 
-st.sidebar.divider()
+    number_of_recommendations = st.slider(
+        "Number of recommendations",
+        min_value=3,
+        max_value=10,
+        value=5
+    )
 
-number_of_recommendations = st.sidebar.slider(
-    "Number of recommendations",
-    min_value=3,
-    max_value=10,
-    value=5
-)
+    st.divider()
+
+    st.write("### About SalesBot")
+
+    st.write(
+        "SalesBot analyzes historical transactions "
+        "to identify products frequently purchased "
+        "together."
+    )
 
 
-# -----------------------------
+# --------------------------------
 # Product selection
-# -----------------------------
+# --------------------------------
+
+st.markdown(
+    '<div class="section-title"><h2>🔎 Find Product Recommendations</h2></div>',
+    unsafe_allow_html=True
+)
+
 
 products = (
     recommender.df[
@@ -135,6 +186,7 @@ products = (
     .sort_values("description")
 )
 
+
 product_options = products.apply(
     lambda row:
     f"{row['description']} ({row['stock_code']})",
@@ -143,18 +195,17 @@ product_options = products.apply(
 
 
 selected_product = st.selectbox(
-    "🔎 Select a product",
+    "Select a product",
     product_options
 )
 
 
-# Extract stock code
-selected_code = selected_product.split("(")[-1].replace(")", "")
+selected_code = (
+    selected_product
+    .split("(")[-1]
+    .replace(")", "")
+)
 
-
-# -----------------------------
-# Recommendation button
-# -----------------------------
 
 if st.button(
     "✨ Get Recommendations",
@@ -167,17 +218,26 @@ if st.button(
         number_of_recommendations
     )
 
+
     if not recommendations:
 
         st.warning(
             "No recommendations were found for this product."
         )
 
+
     else:
 
-        st.subheader(
-            "Customers who bought this product also bought:"
+        st.markdown(
+            '<div class="section-title"><h2>🛍️ Recommended Products</h2></div>',
+            unsafe_allow_html=True
         )
+
+        st.success(
+            "Recommendations generated from historical "
+            "purchase patterns."
+        )
+
 
         for number, recommendation in enumerate(
             recommendations,
@@ -188,24 +248,33 @@ if st.button(
                 f"""
                 <div class="recommendation-card">
 
-                <strong>
-                {number}. {recommendation['description']}
-                </strong>
+                    <div class="product-name">
+                        {number}. {recommendation['description']}
+                    </div>
 
-                <br>
+                    <div class="product-code">
+                        Product code:
+                        {recommendation['stock_code']}
+                    </div>
 
-                Product code:
-                {recommendation['stock_code']}
+                    <br>
 
-                <br>
+                    <strong>
+                        🛒 Bought together:
+                    </strong>
 
-                Bought together:
-                {recommendation['times_bought_together']} times
+                    {recommendation['times_bought_together']}
+                    times
 
-                <br>
+                    <br><br>
 
-                Recommendation confidence:
-                {recommendation['confidence']}%
+                    <strong>
+                        📊 Recommendation confidence:
+                    </strong>
+
+                    <span class="confidence">
+                        {recommendation['confidence']}%
+                    </span>
 
                 </div>
                 """,
@@ -213,13 +282,20 @@ if st.button(
             )
 
 
-# -----------------------------
-# Project information
-# -----------------------------
+# --------------------------------
+# Project statistics
+# --------------------------------
 
 st.divider()
 
+st.markdown(
+    '<div class="section-title"><h2>📊 Dataset Overview</h2></div>',
+    unsafe_allow_html=True
+)
+
+
 col1, col2, col3 = st.columns(3)
+
 
 with col1:
 
@@ -228,6 +304,7 @@ with col1:
         f"{recommender.df['customer_id'].nunique():,}"
     )
 
+
 with col2:
 
     st.metric(
@@ -235,13 +312,19 @@ with col2:
         f"{recommender.df['stock_code'].nunique():,}"
     )
 
+
 with col3:
 
     st.metric(
-        "Transactions",
+        "Invoices",
         f"{recommender.df['invoice_no'].nunique():,}"
     )
 
+
+st.divider()
+
+
 st.caption(
-    "SalesBot AI Recommender — built using retail transaction data."
+    "SalesBot AI Recommender • Built with Python, "
+    "Pandas, Scikit-learn and Streamlit"
 )
