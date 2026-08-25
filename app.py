@@ -98,26 +98,12 @@ st.markdown(
 # HERO
 # ==========================================
 
-st.markdown(
-    """
-    <div class="hero-box">
-    """,
-    unsafe_allow_html=True
-)
-
 st.title("🤖 SalesBot AI")
 
-st.markdown(
-    """
-    <p>
-    Intelligent product recommendations powered by
-    real-world retail transaction data.
-    </p>
-    """,
-    unsafe_allow_html=True
+st.write(
+    "Intelligent product recommendations powered by "
+    "real-world retail transaction data."
 )
-
-st.markdown("</div>", unsafe_allow_html=True)
 
 
 st.write(
