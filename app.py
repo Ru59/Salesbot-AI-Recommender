@@ -4,9 +4,9 @@ import pandas as pd
 from recommender import SalesBotRecommender
 
 
-# --------------------------------
-# Page configuration
-# --------------------------------
+# ==========================================
+# PAGE CONFIGURATION
+# ==========================================
 
 st.set_page_config(
     page_title="SalesBot AI",
@@ -16,51 +16,46 @@ st.set_page_config(
 )
 
 
-# --------------------------------
-# Custom styling
-# --------------------------------
+# ==========================================
+# CUSTOM CSS
+# ==========================================
 
 st.markdown(
     """
     <style>
 
+    /* Main page */
     .main {
         padding-top: 1rem;
     }
 
-    .hero {
-        padding: 2.5rem;
+    /* Hero section */
+    .hero-box {
+        padding: 2rem;
         border-radius: 20px;
-        background: linear-gradient(
-            135deg,
-            #111827,
-            #374151
-        );
-        color: white;
-        margin-bottom: 2rem;
+        background: linear-gradient(135deg, #111827, #374151);
+        margin-bottom: 1.5rem;
     }
 
-    .hero h1 {
-        font-size: 3rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .hero p {
-        font-size: 1.15rem;
+    .hero-box p {
         color: #e5e7eb;
+        font-size: 1.1rem;
+        margin-bottom: 0;
     }
 
+    /* Recommendation cards */
     .recommendation-card {
-        padding: 1.25rem;
+        padding: 1.2rem;
         border-radius: 15px;
         border: 1px solid #e5e7eb;
-        background: #ffffff;
+        background: white;
         margin-bottom: 1rem;
     }
 
     .product-name {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 700;
+        margin-bottom: 0.4rem;
     }
 
     .product-code {
@@ -69,12 +64,28 @@ st.markdown(
     }
 
     .confidence {
-        font-weight: 600;
+        font-weight: 700;
     }
 
-    .section-title {
-        margin-top: 2rem;
-        margin-bottom: 1rem;
+    /* Mobile improvements */
+    @media (max-width: 768px) {
+
+        .hero-box {
+            padding: 1.4rem;
+        }
+
+        .hero-box p {
+            font-size: 1rem;
+        }
+
+        h1 {
+            font-size: 2rem !important;
+        }
+
+        h2 {
+            font-size: 1.5rem !important;
+        }
+
     }
 
     </style>
@@ -83,25 +94,30 @@ st.markdown(
 )
 
 
-# --------------------------------
-# Header
-# --------------------------------
+# ==========================================
+# HERO
+# ==========================================
 
 st.markdown(
     """
-    <div class="hero">
-
-        <h1>🤖 SalesBot AI</h1>
-
-        <p>
-            Intelligent product recommendations powered by
-            real-world retail transaction data.
-        </p>
-
-    </div>
+    <div class="hero-box">
     """,
     unsafe_allow_html=True
 )
+
+st.title("🤖 SalesBot AI")
+
+st.markdown(
+    """
+    <p>
+    Intelligent product recommendations powered by
+    real-world retail transaction data.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 
 st.write(
@@ -110,9 +126,9 @@ st.write(
 )
 
 
-# --------------------------------
-# Load recommendation engine
-# --------------------------------
+# ==========================================
+# LOAD RECOMMENDATION ENGINE
+# ==========================================
 
 @st.cache_resource
 def load_recommender():
@@ -142,9 +158,9 @@ except Exception as error:
     st.stop()
 
 
-# --------------------------------
-# Sidebar
-# --------------------------------
+# ==========================================
+# SIDEBAR
+# ==========================================
 
 with st.sidebar:
 
@@ -159,7 +175,7 @@ with st.sidebar:
 
     st.divider()
 
-    st.write("### About SalesBot")
+    st.subheader("About SalesBot")
 
     st.write(
         "SalesBot analyzes historical transactions "
@@ -168,13 +184,15 @@ with st.sidebar:
     )
 
 
-# --------------------------------
-# Product selection
-# --------------------------------
+# ==========================================
+# PRODUCT SEARCH
+# ==========================================
 
-st.markdown(
-    '<div class="section-title"><h2>🔎 Find Product Recommendations</h2></div>',
-    unsafe_allow_html=True
+st.header("🔎 Find Product Recommendations")
+
+st.write(
+    "Choose a product below to discover related "
+    "products based on historical purchase patterns."
 )
 
 
@@ -207,6 +225,10 @@ selected_code = (
 )
 
 
+# ==========================================
+# RECOMMENDATION BUTTON
+# ==========================================
+
 if st.button(
     "✨ Get Recommendations",
     type="primary",
@@ -218,81 +240,61 @@ if st.button(
         number_of_recommendations
     )
 
-
     if not recommendations:
 
         st.warning(
             "No recommendations were found for this product."
         )
 
-
     else:
 
-        st.markdown(
-            '<div class="section-title"><h2>🛍️ Recommended Products</h2></div>',
-            unsafe_allow_html=True
-        )
+        st.header("🛍️ Recommended Products")
 
         st.success(
             "Recommendations generated from historical "
             "purchase patterns."
         )
 
-
         for number, recommendation in enumerate(
             recommendations,
             start=1
         ):
 
-            st.markdown(
-                f"""
-                <div class="recommendation-card">
+            with st.container(border=True):
 
-                    <div class="product-name">
-                        {number}. {recommendation['description']}
-                    </div>
+                st.subheader(
+                    f"{number}. {recommendation['description']}"
+                )
 
-                    <div class="product-code">
-                        Product code:
-                        {recommendation['stock_code']}
-                    </div>
+                st.caption(
+                    f"Product code: "
+                    f"{recommendation['stock_code']}"
+                )
 
-                    <br>
+                col1, col2 = st.columns(2)
 
-                    <strong>
-                        🛒 Bought together:
-                    </strong>
+                with col1:
 
-                    {recommendation['times_bought_together']}
-                    times
+                    st.write(
+                        "🛒 **Bought together:** "
+                        f"{recommendation['times_bought_together']} times"
+                    )
 
-                    <br><br>
+                with col2:
 
-                    <strong>
-                        📊 Recommendation confidence:
-                    </strong>
-
-                    <span class="confidence">
-                        {recommendation['confidence']}%
-                    </span>
-
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+                    st.write(
+                        "📊 **Recommendation confidence:** "
+                        f"{recommendation['confidence']}%"
+                    )
 
 
-# --------------------------------
-# Project statistics
-# --------------------------------
+# ==========================================
+# DATASET OVERVIEW
+# ==========================================
 
 st.divider()
 
-st.markdown(
-    '<div class="section-title"><h2>📊 Dataset Overview</h2></div>',
-    unsafe_allow_html=True
-)
-
+st.header("📊 Dataset Overview")
 
 col1, col2, col3 = st.columns(3)
 
@@ -321,8 +323,11 @@ with col3:
     )
 
 
-st.divider()
+# ==========================================
+# FOOTER
+# ==========================================
 
+st.divider()
 
 st.caption(
     "SalesBot AI Recommender • Built with Python, "
